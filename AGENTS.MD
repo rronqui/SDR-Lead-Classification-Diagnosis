@@ -32,6 +32,12 @@ uvicorn src.api.main:app --reload
 ruff check src/
 ```
 
+## Releases (SemVer via release-please)
+- Branch `master` protegida: mudanças entram via issue → branch (`fix/#N`, `feat/#N`) → PR (`Closes #N`) → CI `quality` verde → squash merge.
+- Commits: Conventional Commits (`fix:` patch, `feat:` minor, `!` major) — validados pelo hook `.githooks/commit-msg` (instalar: `sh scripts/install-hooks.sh`); `.githooks/pre-push` bloqueia push direto na master (bypass: `--no-verify`).
+- `release-please` abre PR de release (changelog + versão). NUNCA edite a versão manualmente (fonte única: `pyproject.toml`); o PR de release é mergado manualmente (cadência humana).
+- Versão servida em `GET /version` e no OpenAPI.
+
 ## Structure
 
 ```

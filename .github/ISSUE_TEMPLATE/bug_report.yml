@@ -1,0 +1,31 @@
+name: Bug Report
+description: Reportar um defeito
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: descricao
+    attributes:
+      label: Descrição do bug
+      description: O que aconteceu e o que era esperado?
+    validations:
+      required: true
+  - type: textarea
+    id: reproducao
+    attributes:
+      label: Passos para reproduzir
+      description: Passos mínimos, com entrada de exemplo (sem dados reais de leads).
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / traces
+      description: Saída relevante (sem tokens ou PII).
+    validations:
+      required: false
+  - type: input
+    id: versao
+    attributes:
+      label: Versão
+      description: Saída de GET /version ou git rev-parse --short HEAD
