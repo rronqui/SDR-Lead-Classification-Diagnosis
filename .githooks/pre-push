@@ -1,0 +1,17 @@
+#!/bin/sh
+# Bloqueia push direto na branch default (master). Mudanças entram via branch + PR.
+# O git passa as refs pela STDIN: "<local ref> <local sha> <remote ref> <remote sha>" (uma por linha).
+# Bypass documentado: git push --no-verify
+# Instalação: scripts/install-hooks.sh
+DEFAULT_BRANCH="master"
+
+while read -r local_ref _local_sha _remote_ref _remote_sha; do
+  if [ "$local_ref" = "refs/heads/$DEFAULT_BRANCH" ]; then
+    echo "pre-push: push direto na branch '$DEFAULT_BRANCH' bloqueado." >&2
+    echo "  Crie uma branch (feat/#N, fix/#N) e abra um PR." >&2
+    echo "  Bypass: git push --no-verify" >&2
+    exit 1
+  fi
+done
+
+exit 0

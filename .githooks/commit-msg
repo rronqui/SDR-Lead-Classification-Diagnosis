@@ -1,0 +1,24 @@
+#!/bin/sh
+# Valida o título do commit contra Conventional Commits.
+# Isenta: Merge, Revert, fixup!, squash!.
+# Instalação: scripts/install-hooks.sh
+MSG_FILE="$1"
+[ -f "$MSG_FILE" ] || exit 0
+
+TITLE=$(head -n 1 "$MSG_FILE")
+
+case "$TITLE" in
+  Merge*|Revert*|fixup!*|squash!*)
+    exit 0
+    ;;
+esac
+
+if echo "$TITLE" | grep -Eq '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([A-Za-z0-9._/-]+\))?!?: .+'; then
+  exit 0
+fi
+
+echo "commit-msg: título fora do padrão Conventional Commits:" >&2
+echo "  $TITLE" >&2
+echo "  formato: <tipo>[escopo opcional][!]: <descrição>" >&2
+echo "  tipos: feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert" >&2
+exit 1
