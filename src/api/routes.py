@@ -50,7 +50,7 @@ async def webhook_zapi(raw_request: Request, db: Session = Depends(get_db)):
         perguntas = db.query(models.PerguntaDiagnostico).filter(
             models.PerguntaDiagnostico.lead_id == lead.id,
             models.PerguntaDiagnostico.validada,
-            models.PerguntaDiagnostico.posicao < lead.posicao_pergunta + 1, 
+            models.PerguntaDiagnostico.posicao < lead.posicao_pergunta + 1,
         ).order_by(models.PerguntaDiagnostico.posicao).all()
 
         historico = []
