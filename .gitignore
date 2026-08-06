@@ -1,0 +1,23 @@
+# Environment (contém secrets)
+.env
+
+# Python
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Tests
+tests/
+
+# Database
+*.db
+*.sqlite
+
+# n8n (workflows)
+n8n/
+
+#VS Code
+.vscode/
+

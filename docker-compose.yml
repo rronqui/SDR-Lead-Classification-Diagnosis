@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: sdr-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sdr
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sdr-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: sdr-api
+    ports:
+      - "8001:8000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/sdr
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sdr-network
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: sdr-ngrok
+    command: http http://sdr-api:8000 --url=${NGROK_DOMAIN:-} --log=stdout
+    env_file:
+      - .env
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:-}
+    depends_on:
+      - app
+    networks:
+      - sdr-network
+
+networks:
+  sdr-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
