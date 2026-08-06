@@ -21,3 +21,6 @@ n8n/
 #VS Code
 .vscode/
 
+
+# Estado do tdd-orchestrator
+.omp/
