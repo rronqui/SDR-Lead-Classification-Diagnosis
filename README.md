@@ -2,27 +2,22 @@
 
 Sistema de classificação e diagnóstico de leads B2B via WhatsApp utilizando LangChain, LangGraph, LangSmith, FastAPI e PostgreSQL.
 
+![CI](https://github.com/rronqui/SDR-Lead-Classification-Diagnosis/actions/workflows/ci.yml/badge.svg)
+
 ## Estrutura do Projeto
 
 ```
 SDR/
-├── pyproject.toml            # Dependências Python
+├── pyproject.toml            # Dependências Python (fonte única de versão)
 ├── .env.example              # Variáveis de ambiente (copiar para .env)
 ├── alembic.ini               # Configuração Alembic
 ├── alembic/                  # Migrations do banco de dados
-│   ├── env.py
-│   └── versions/
-│       ├── 001_initial.py
-│       ├── 002_add_missing_fk_constraints.py
-│       ├── 003_alter_objetivo_indicador_to_text.py
-│       └── 004_remove_unused_diagnostico_fields.py
 ├── src/
 │   ├── api/
 │   │   ├── config.py         # Configurações (inclui LangChain/LangSmith)
 │   │   ├── routes.py         # Endpoints
 │   │   └── main.py           # App
 │   ├── agents/               # Agentes LangChain (rastreados via LangSmith)
-│   │   ├── __init__.py       # 7 agentes exportados
 │   │   ├── base.py           # BaseAgent com tracing LangSmith
 │   │   ├── prompts.py        # System prompts
 │   │   ├── schemas.py        # Input/Output schemas
@@ -34,20 +29,16 @@ SDR/
 │   │   ├── gerar_diagnostico.py
 │   │   └── msg_fechamento.py
 │   ├── graph/                # LangGraph (rastreado via LangSmith)
-│   │   ├── __init__.py       # NewLeadGraph + MainChatGraph
 │   │   ├── nodes.py          # Nós do grafo
 │   │   ├── states.py         # Definições de estado
 │   │   ├── new_lead.py
 │   │   └── main_chat.py
-│   ├── models/               # SQLAlchemy
-│   │   ├── base.py
-│   │   └── models.py         # 6 tabelas
+│   ├── models/               # SQLAlchemy (6 tabelas)
 │   ├── schemas/              # Pydantic API
-│   │   └── __init__.py
-│   └── services/             # Serviços externos
-│       ├── database.py
-│       ├── zapi.py
-│       └── hubspot.py
+│   └── services/             # Serviços externos (database, zapi, hubspot)
+├── .github/                  # CI, release-please, templates
+├── .githooks/                # Hooks git locais (commit-msg, pre-push)
+└── scripts/                  # Scripts auxiliares (install-hooks.sh)
 ```
 
 ## Quick Start
@@ -67,6 +58,9 @@ pip install -e ".[dev]"
 # Copiar variáveis de ambiente
 cp .env.example .env
 # Editar .env com suas chaves API
+
+# Instalar hooks git (Conventional Commits + proteção da master)
+sh scripts/install-hooks.sh
 ```
 
 ### 2. Banco de Dados
@@ -124,6 +118,8 @@ A API estará disponível em: `http://localhost:8000`
 | POST | `/leads` | Cria novo lead |
 | GET | `/leads/{id}` | Retorna lead específico |
 | GET | `/leads` | Lista leads com filtros |
+| GET | `/health` | Health check |
+| GET | `/version` | Versão da aplicação (fonte: pyproject.toml) |
 
 ---
 
@@ -136,8 +132,6 @@ A API estará disponível em: `http://localhost:8000`
 4. Gera primeira pergunta
 5. Envia mensagem boas-vindas via Z-API
 
-> **Nota:** Todas as execuções de agentes são rastreadas via LangSmith.
-
 ### Fluxo MainChat
 1. Recebe resposta do lead
 2. Valida pertinência (ValidarResposta)
@@ -148,7 +142,7 @@ A API estará disponível em: `http://localhost:8000`
 7. Cria msg fechamento (MsgFechamento)
 8. Envia para HubSpot + WhatsApp
 
-> **Nota:** Cada agente executado envia traces para LangSmith, permitindo debug detalhado de cada etapa.
+> **Nota:** Todas as execuções de agentes e chains são rastreadas via LangSmith.
 
 ---
 
@@ -163,8 +157,6 @@ A API estará disponível em: `http://localhost:8000`
 | 5 | ClassificaLead | Classifica A/B/C + score |
 | 6 | GerarDiagnostico | Gera relatório técnico |
 | 7 | MsgFechamento | Cria mensagem de fechamento |
-
-> **Nota:** Todas as execuções de agentes são rastreadas via **LangSmith** para debugging, análise de performance e otimização de prompts. |
 
 ---
 
@@ -184,51 +176,56 @@ A API estará disponível em: `http://localhost:8000`
 | WhatsApp | Z-API |
 | Observabilidade | LangSmith |
 
-### LangSmith (Observabilidade)
+---
 
-O projeto utiliza **LangSmith** para rastreamento completo das execuções de agentes e chains:
+## Versionamento e Releases (SemVer)
 
-- **Tracing:** Todas as chamadas aos agentes LangChain e execuções do LangGraph são automaticamente rastreadas
-- **Debugging:** Visualização detalhada de prompts, respostas e tokens utilizados
-- **Métricas:** Latência por agente, contagem de tokens, custos
-- **Projeto:** `SDR-Lead-Classification-Diagnosis` (configurável via `LANGCHAIN_PROJECT`)
+O projeto segue [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`.
 
-Configure em `.env`:
+- A versão vive em **um único lugar**: `pyproject.toml`. A API a expõe via
+  `GET /version` e no OpenAPI (`importlib.metadata`).
+- Commits seguem [Conventional Commits](https://www.conventionalcommits.org/),
+  validados pelo hook local `commit-msg` (instale com `sh scripts/install-hooks.sh`):
+  - `fix:` → bump PATCH | `feat:` → bump MINOR | `!` / `BREAKING CHANGE:` → bump MAJOR
+- O [release-please](https://github.com/googleapis/release-please) roda no push da
+  `master` e abre um PR de release (changelog + bump de versão). **Ninguém edita a
+  versão manualmente**; o merge do PR de release gera a tag e o GitHub Release.
+- O workflow usa o secret `RELEASE_PLEASE_TOKEN` (PAT): PRs criados com o
+  `GITHUB_TOKEN` padrão não disparam outros workflows, e o PR de release precisa
+  passar pelo CI obrigatório.
+- Cadência de release é decisão humana: o PR de release é mergado manualmente.
+
+### Atualizando uma instalação local após release
+
 ```bash
-LANGCHAIN_API_KEY=lsv2_...
-LANGCHAIN_PROJECT=SDR-Lead-Classification-Diagnosis
+git checkout master && git pull --rebase
+pip install -e ".[dev]"     # ou: docker-compose up -d --build
+curl -s http://localhost:8000/version
 ```
-
-Acesse o dashboard em: https://smith.langchain.com/
 
 ---
 
-## Licença
+## Como contribuir (fluxo protegido)
 
-MIT
+A branch `master` é protegida por ruleset: não aceita push direto nem
+fast-forward, exige PR e o check `quality` do CI verde.
+
+1. Abra uma issue (bug ou feature).
+2. Crie uma branch: `fix/#N-<slug>` ou `feat/#N-<slug>`.
+3. Commite com Conventional Commits.
+4. Abra o PR com `Closes #N` no corpo.
+5. CI (`quality`: ruff) deve passar; o merge é squash.
 
 ---
 
 ## Docker
 
-### Preparação
-
-```bash
-# Copiar variáveis de ambiente
-cp .env.example .env
-# Editar .env com suas chaves API
-```
-
 ### Executar com Docker
 
 ```bash
-# Build e start dos containers
+cp .env.example .env   # editar com suas chaves
 docker-compose up --build
-
-# Ver logs
 docker-compose logs -f app
-
-# Parar containers
 docker-compose down
 ```
 
@@ -237,15 +234,24 @@ docker-compose down
 | Serviço | Porta | Descrição |
 |---------|-------|-----------|
 | `postgres` | 5432 (interno) | Banco de dados PostgreSQL |
-| `app` | 8000 | API FastAPI |
+| `app` | 8001 → 8000 | API FastAPI |
+| `ngrok` | — | Túnel para webhooks (opcional) |
 
-### Scripts Úteis
+---
 
-```bash
-# Recriar banco de dados
-docker-compose down -v
-docker-compose up --build
+## Privacidade
 
-# Acessar shell do container
-docker-compose exec app sh
-```
+O sistema processa mensagens de WhatsApp de leads (texto livre, potencialmente
+com dados pessoais) e as sincroniza com o HubSpot. Para operar:
+
+- Mantenha as credenciais apenas no `.env` (fora do versionamento); use
+  `.env.example` só com nomes de variáveis.
+- Os traces do LangSmith podem conter conteúdo das conversas — restrinja o
+  acesso ao projeto no LangSmith.
+- Não commite dados de leads, conversas ou credenciais reais.
+
+---
+
+## Licença
+
+[MIT](LICENSE)

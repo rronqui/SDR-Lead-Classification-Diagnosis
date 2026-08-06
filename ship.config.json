@@ -1,0 +1,7 @@
+{
+  "dbPath": null,
+  "buildCommand": "pip install -e \".[dev]\"",
+  "stopCommand": "docker-compose down",
+  "startCommand": "docker-compose up -d --build",
+  "versionCheckUrl": "http://localhost:8001/version"
+}
