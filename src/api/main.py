@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="SDR Lead Classification API",
     description="API para classificação e diagnóstico de leads B2B via WhatsApp",
-    version="0.1.0",
+    version="1.0.0",
 )
 
 app.include_router(router)
