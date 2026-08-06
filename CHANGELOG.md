@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/rronqui/SDR-Lead-Classification-Diagnosis/compare/v1.1.0...v1.1.0) (2026-08-06)
+
+
+### Features
+
+* hooks locais commit-msg e pre-push ([#9](https://github.com/rronqui/SDR-Lead-Classification-Diagnosis/issues/9)) ([44f7e36](https://github.com/rronqui/SDR-Lead-Classification-Diagnosis/commit/44f7e36d750a095cc79a3429fa9ae421e4f9f474))
+
 ## [1.1.0](https://github.com/rronqui/SDR-Lead-Classification-Diagnosis/compare/v1.0.0...v1.1.0) (2026-08-06)
 
 
