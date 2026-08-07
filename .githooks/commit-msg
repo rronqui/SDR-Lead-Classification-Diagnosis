@@ -8,7 +8,7 @@ MSG_FILE="$1"
 TITLE=$(head -n 1 "$MSG_FILE")
 
 case "$TITLE" in
-  Merge*|Revert*|fixup!*|squash!*)
+  Merge[[:space:]]*|Revert[[:space:]]*|fixup!*|squash!*)
     exit 0
     ;;
 esac

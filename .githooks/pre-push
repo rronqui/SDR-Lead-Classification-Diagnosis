@@ -5,8 +5,15 @@
 # Instalação: scripts/install-hooks.sh
 DEFAULT_BRANCH="master"
 
-while read -r local_ref _local_sha _remote_ref _remote_sha; do
-  if [ "$local_ref" = "refs/heads/$DEFAULT_BRANCH" ]; then
+while read -r local_ref _local_sha remote_ref _remote_sha; do
+  branch=""
+  case "$local_ref" in
+    refs/heads/*) branch="${local_ref#refs/heads/}" ;;
+  esac
+  # Checa o local ref E o remote ref: refspecs como 'git push origin HEAD:master'
+  # (e a deleção ':master') enviam outro valor no campo 1 e refs/heads/<default>
+  # no campo 3 — o remote ref precisa ser checado mesmo quando o local ref não é branch.
+  if [ "$branch" = "$DEFAULT_BRANCH" ] || [ "$remote_ref" = "refs/heads/$DEFAULT_BRANCH" ]; then
     echo "pre-push: push direto na branch '$DEFAULT_BRANCH' bloqueado." >&2
     echo "  Crie uma branch (feat/#N, fix/#N) e abra um PR." >&2
     echo "  Bypass: git push --no-verify" >&2
