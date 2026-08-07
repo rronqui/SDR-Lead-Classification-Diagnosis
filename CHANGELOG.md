@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/rronqui/SDR-Lead-Classification-Diagnosis/compare/v1.2.0...v1.2.1) (2026-08-07)
+
+
+### Bug Fixes
+
+* implementação ([#19](https://github.com/rronqui/SDR-Lead-Classification-Diagnosis/issues/19)) ([#20](https://github.com/rronqui/SDR-Lead-Classification-Diagnosis/issues/20)) ([020e3b9](https://github.com/rronqui/SDR-Lead-Classification-Diagnosis/commit/020e3b95c9d736fd20f31a763bdadf80f01e69d5))
+
 ## [1.2.0](https://github.com/rronqui/SDR-Lead-Classification-Diagnosis/compare/v1.1.0...v1.2.0) (2026-08-06)
 
 
